@@ -30,6 +30,10 @@ router.get('/:username', (req, res) => {
         n = start - 1;
     }
 
+    // TODO:
+    // - display HTML formatted title and body for each post with modified and
+    //   created date/time
+    // - make 'next' link disappear when no more posts are available
     db_manager.connect()
       .then(db => db.collection('Posts'))
       .then(collection => collection.find(query, {sort: {postid: 1}}))
