@@ -4,7 +4,6 @@ var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 var db_manager = require('../db');
 
-const secret = 'C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c';
 const options = {
     algorithm: 'HS256',
     expiresIn: '2h',
@@ -13,6 +12,7 @@ const options = {
 
 router.get('/', (req, res) => {
     let {username, password, redirect} = req.query;
+    let {secret} = req.app.locals;
 
     if (!(username && password)) {
         res.render('login');

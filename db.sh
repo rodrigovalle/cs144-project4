@@ -5,6 +5,9 @@ db.Users.drop()
 db.createCollection("Posts")
 db.createCollection("Users")
 
+db.Posts.createIndex({ "postid": 1, "username": 1 }, { "unique": true })
+db.Users.createIndex({ "username": 1 }, { "unique": true })
+
 db.Posts.save({ "postid": 1, "username": "cs144", "created": 1518669344517, "modified": 1518669344517, "title": "Title 1", "body": "Hello, world!" })
 db.Posts.save({ "postid": 2, "username": "cs144", "created": 1518669658420, "modified": 1518669658420, "title": "Title 2", "body": "I am here." })
 
