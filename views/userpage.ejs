@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= username %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1 class='user'><%= username %></h1>
+    <ul>
+        <% for (let post of posts) { %>
+            <li><%= post.title %></li>
+        <% } %>
+    </ul>
+    <a id='next' href='/blog/<%= username %>?start=<%= start+5 %>'>next</a>
+  </body>
+</html>

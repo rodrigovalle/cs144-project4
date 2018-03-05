@@ -1,4 +1,7 @@
 use BlogServer
+
+db.Posts.drop()
+db.Users.drop()
 db.createCollection("Posts")
 db.createCollection("Users")
 
