@@ -7,10 +7,16 @@
   <body>
     <h1 class='user'><%= username %></h1>
     <ul>
-        <% for (let post of posts) { %>
-            <li><%= post.title %></li>
-        <% } %>
+      <% for (let post of posts) { %>
+        <li>
+          <%- post.htmlTitle %>
+          <%- post.htmlBody %>
+          Last modified: <%= new Date(post.modified).toDateString() %>
+        </li>
+      <% } %>
     </ul>
-    <a id='next' href='/blog/<%= username %>?start=<%= start+5 %>'>next</a>
+    <% if (next) { %>
+      <a id='next' href='/blog/<%= username %>?start=<%= next %>'>next</a>
+    <% } %>
   </body>
 </html>

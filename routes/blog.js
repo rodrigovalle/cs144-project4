@@ -1,59 +1,97 @@
 var express = require('express');
 var router = express.Router();
 var commonmark = require('commonmark');
-var db_manager = require('../db');
+var db = require('../db');
 var querystring = require('querystring');
 
 var parser = new commonmark.Parser()
 var renderer = new commonmark.HtmlRenderer();
 
 function postToHTML(post) {
+    let {username, title, body, modified, created} = post;
+    title = title || '';
+    body = body || '';
+
     return {
-        title: post.title,
-        htmlTitle: renderer.render(parser.parse(post.title)),
-        htmlBody: renderer.render(parser.parse(post.body))
+        title: title,
+        author: username,
+        htmlTitle: renderer.render(parser.parse(title)),
+        htmlBody: renderer.render(parser.parse(body)),
+        modified: modified,
+        created: created
     };
 }
 
 router.get('/:username', (req, res) => {
-    // TODO: invalid username?
-    let n = 0;
-    let query = { username: req.params['username'] };
-
-    if ('start' in req.query) {
-        let start = parseInt(req.query.start);
-        if (start <= 0) {
+    let start = 1;
+    if (req.query.start) {
+        start = parseInt(req.query.start);
+        if (start <= 0 || isNaN(start)) {
             req.query.start = 1;
-            console.log(req.path);
             res.redirect(req.baseUrl + req.path + '?' + querystring.stringify(req.query));
+            return;
         }
-        n = start - 1;
     }
 
-    // TODO:
-    // - display HTML formatted title and body for each post with modified and
-    //   created date/time
-    // - make 'next' link disappear when no more posts are available
-    db_manager.connect()
-      .then(db => db.collection('Posts'))
-      .then(collection => collection.find(query, {sort: {postid: 1}}))
-      .then(cursor => cursor.skip(n).limit(5).toArray())
-      .then(posts => res.render('userpage', {username: query.username, posts: posts, start: n}))
-      .catch(err => console.log('ERROR: ' + err.message));
+    const user_query = {
+        username: req.params.username
+    };
+
+    const post_query = {
+        username: req.params.username,
+        postid: { $gte: start }
+    };
+
+    const post_query_opts = {
+        projection: { _id: 0 },
+        sort: { postid: 1 },
+        limit: 6
+    };
+
+    let p1 = db.collection('Users')
+               .then(collection => collection.findOne(user_query))
+
+    let p2 = db.collection('Posts')
+               .then(collection => collection.find(post_query, post_query_opts))
+               .then(cursor => cursor.toArray())
+
+    Promise.all([p1, p2]).then((values) => {
+        let [user, posts] = values;
+        if (!user) {
+            res.render('error', {
+                message: 'User not found',
+                error: {status: '', stack: ''}
+            });
+        } else {
+            res.render('userpage', {
+                username: req.params.username,
+                posts: posts.slice(0,5).map(postToHTML),
+                next: posts[5] ? posts[5].postid : null
+            });
+        }
+    })
+    .catch(err => console.log('ERROR: ' + err.message));
 })
 
 router.get('/:username/:postid', (req, res) => {
     // TODO: what if invalid postid/integer?
-    let query = {
-        username: req.params['username'],
-        postid: parseInt(req.params['postid'])
+    const query = {
+        username: req.params.username,
+        postid: parseInt(req.params.postid)
     };
 
-    db_manager.connect()
-      .then(db => db.collection('Posts'))
-      .then(collection => collection.findOne(query))
-      .then(post => res.render('post', postToHTML(post)))
-      .catch(err => console.log('ERROR: ' + err.message));
+    const error_page = {
+        message: 'Post not found',
+        error: {status: '', stack: ''}
+    }
+
+    db.collection('Posts')
+    .then(collection => collection.findOne(query))
+    .then(post =>
+        post ? res.render('post', postToHTML(post)) :
+               res.render('error', error_page)
+    )
+    .catch(err => console.log('ERROR: ' + err.message));
 })
 
 module.exports = router;

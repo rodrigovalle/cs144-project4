@@ -7,5 +7,18 @@
   <body>
     <div class='title'><%- htmlTitle %></div>
     <div class='body'><%- htmlBody %></div>
+    <hr>
+    <p>
+      <i>author:</i>
+      <%- author %>
+    </p>
+    <p>
+      <i>last modified:</i>
+      <%- new Date(modified).toLocaleString() %>
+    <p>
+    <p>
+      <i>created:</i>
+      <%- new Date(created).toLocaleString() %>
+    </p>
   </body>
 </html>

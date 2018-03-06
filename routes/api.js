@@ -7,6 +7,11 @@ var db_manager = require('../db');
  * If a request does not meet our requirements (such as not formatting data in
  * JSON, not including required data, etc.), the server must reply with "400
  * (Bad request)" status code.
+ * 
+ * change: bodyparser.json only runs on requests to /api
+ * 
+ * TODO:
+ * check to make sure values in the JSON body actually exist before using them
  */
 
 router.all('/:username*', (req, res, next) => {
@@ -27,7 +32,7 @@ router.all('/:username*', (req, res, next) => {
         } else {
             res.status(401).end();
         }
-    }).catch(err => console.log('jwt verification error: ' + err.message));
+    }).catch(err => res.status(401).end());
 });
 
 router.get('/:username', (req, res) => {

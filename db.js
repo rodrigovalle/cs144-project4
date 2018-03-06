@@ -25,6 +25,10 @@ exports.connect = function() {
     });
 }
 
+exports.collection = function(collection_name) {
+    return exports.connect().then(db => db.collection(collection_name));
+}
+
 exports.close = function() {
     if (db) {
         return db.close()

@@ -20,14 +20,14 @@ app.locals.secret = 'C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c';
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/blog', blog);
+app.use('/login', bodyParser.urlencoded({ extended: false }));
 app.use('/login', login);
+app.use('/api', bodyParser.json());
 app.use('/api', api);
 
 // catch 404 and forward to error handler
