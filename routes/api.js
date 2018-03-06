@@ -3,9 +3,32 @@ var router = express.Router();
 var jwt = require('jsonwebtoken');
 var db_manager = require('../db');
 
-let jwt_options = {
-    algorithms: ['HS256']
-}
+/* TODO:
+ * If a request does not meet our requirements (such as not formatting data in
+ * JSON, not including required data, etc.), the server must reply with "400
+ * (Bad request)" status code.
+ */
+
+router.all('/:username*', (req, res, next) => {
+    if (!req.cookies.jwt) {
+        res.status(401).end();
+    }
+
+    let secret = req.app.locals.secret;
+    let auth = req.cookies.jwt
+
+    new Promise((resolve, reject) => {
+        jwt.verify(auth, secret, {algorithms: ['HS256']}, (err, decoded) =>
+            err ? reject(err) : resolve(decoded)
+        );
+    }).then(decoded => {
+        if (decoded.usr === req.params.username) {
+            next()
+        } else {
+            res.status(401).end();
+        }
+    }).catch(err => console.log('jwt verification error: ' + err.message));
+});
 
 router.get('/:username', (req, res) => {
     db_manager.connect()
