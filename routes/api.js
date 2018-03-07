@@ -3,20 +3,11 @@ var router = express.Router();
 var jwt = require('jsonwebtoken');
 var db_manager = require('../db');
 
-/* TODO:
- * If a request does not meet our requirements (such as not formatting data in
- * JSON, not including required data, etc.), the server must reply with "400
- * (Bad request)" status code.
- * 
- * change: bodyparser.json only runs on requests to /api
- * 
- * TODO:
- * check to make sure values in the JSON body actually exist before using them
- */
-
-router.all('/:username*', (req, res, next) => {
-    if (!req.cookies.jwt) {
+// authenticate
+router.use('/:username', (req, res, next) => {
+    if (!('jwt' in req.cookies)) {
         res.status(401).end();
+        return;
     }
 
     let secret = req.app.locals.secret;
@@ -36,19 +27,39 @@ router.all('/:username*', (req, res, next) => {
 });
 
 router.get('/:username', (req, res) => {
+    let query = {
+        username: req.params.username
+    };
+
+    let query_opts = {
+        sort: {postid: 1},
+        projection: {_id: 0}
+    };
+
     db_manager.connect()
      .then(db => db.collection('Posts'))
-     .then(collection => collection.find({username: req.params.username}, {sort: {postid: 1}}))
+     .then(collection => collection.find(query, query_opts))
      .then(cursor => cursor.toArray())
      .then(documents => res.status(200).send(documents))
      .catch(err => console.log('database error: ' + err.message));
 });
 
+// parse postid, store in req.postid
+router.use('/:username/:postid', (req, res, next) => {
+    let postid = Number(req.params.postid);
+    if (isNaN(postid) || !Number.isInteger(postid) || postid <= 0) {
+        res.status(400).end();
+        return;
+    }
+
+    req.postid = postid;
+    next();
+});
+
 router.get('/:username/:postid', (req, res) => {
-    // TODO: invalid postid?
     let query = {
         username: req.params.username,
-        postid: parseInt(req.params.postid)
+        postid: req.postid
     };
 
     db_manager.connect()
@@ -59,9 +70,15 @@ router.get('/:username/:postid', (req, res) => {
 });
 
 router.post('/:username/:postid', (req, res) => {
-    // TODO: invalid postid?
+    if (!('title' in req.body && 'body' in req.body
+          && typeof req.body.title === 'string'
+          && typeof req.body.body  === 'string')) {
+        res.status(400).end();
+        return;
+    }
+
     let document = {
-        postid: parseInt(req.params.postid),
+        postid: req.postid,
         username: req.params.username,
         created: Date.now(),
         modified: Date.now(),
@@ -77,10 +94,16 @@ router.post('/:username/:postid', (req, res) => {
 });
 
 router.put('/:username/:postid', (req, res) => {
-    // TODO: invalid postid?
+    if (!('title' in req.body && 'body' in req.body
+          && typeof req.body.title === 'string'
+          && typeof req.body.body  === 'string')) {
+        res.status(400).end();
+        return;
+    }
+
     let filter = {
         username: req.params.username,
-        postid: parseInt(req.params.postid),
+        postid: req.postid,
     };
 
     let delta = {
@@ -101,7 +124,7 @@ router.put('/:username/:postid', (req, res) => {
 router.delete('/:username/:postid', (req, res) => {
     let query = {
         username: req.params.username,
-        postid: parseInt(req.params.postid),
+        postid: req.postid,
     };
 
     db_manager.connect()
