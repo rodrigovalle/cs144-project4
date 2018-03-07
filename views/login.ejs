@@ -5,10 +5,17 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-      <form action='/login' method='get'>
-          <input type='text' name='username' placeholder='username'>
-          <input type='password' name='password' placeholder='password'>
-          <input type='submit' value='login'>
-      </form>
+    <h1>login</h1>
+    <% if (retry) { %>
+      <h2>please try again:</h2>
+    <% } %>
+    <form action='/login' method='get'>
+        <input type='text' name='username' placeholder='username'>
+        <input type='password' name='password' placeholder='password'>
+        <input type='submit' value='login'>
+    </form>
+    <% if (retry) { %>
+      <h4>username or password was incorrect</h4>
+    <% } %>
   </body>
 </html>
