@@ -9,6 +9,7 @@ var index = require('./routes/index');
 var blog = require('./routes/blog');
 var login = require('./routes/login');
 var api = require('./routes/api');
+var authenticate = require('./routes/authenticate');
 
 var app = express();
 
@@ -21,12 +22,15 @@ app.locals.secret = 'C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c';
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(cookieParser());
+
+app.use('/edit', authenticate('/login?redirect=/edit'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/blog', blog);
 app.use('/login', bodyParser.urlencoded({ extended: false }));
 app.use('/login', login);
+app.use('/api', authenticate());
 app.use('/api', bodyParser.json());
 app.use('/api', api);
 
