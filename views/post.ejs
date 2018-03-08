@@ -14,11 +14,11 @@
     </p>
     <p>
       <i>last modified:</i>
-      <%- new Date(modified).toLocaleString() %>
+      <%- new Date(modified).toLocaleString('en-US', {timeZone: 'America/Los_Angeles'}) %>
     <p>
     <p>
       <i>created:</i>
-      <%- new Date(created).toLocaleString() %>
+      <%- new Date(created).toLocaleString('en-US', {timeZone: 'America/Los_Angeles'}) %>
     </p>
   </body>
 </html>

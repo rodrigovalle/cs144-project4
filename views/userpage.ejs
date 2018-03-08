@@ -9,9 +9,9 @@
     <ul>
       <% for (let post of posts) { %>
         <li>
-          <%- post.htmlTitle %>
-          <%- post.htmlBody %>
-          Last modified: <%= new Date(post.modified).toDateString() %>
+          <%- post.htmlTitle ? post.htmlTitle : "<p style='font-style: italic; color: grey'>untitled</p>" %>
+          <%- post.htmlBody ? post.htmlBody : "<p style='font-style: italic; color: grey'>no body</p>" %>
+          <p style='color: grey'><i>Last modified:</i> <%= new Date(post.modified).toLocaleString('en-US', {timeZone: 'America/Los_Angeles'}) %></p>
         </li>
       <% } %>
     </ul>

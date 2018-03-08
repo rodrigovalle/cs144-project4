@@ -404,6 +404,9 @@ var EditComponent = /** @class */ (function () {
     EditComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.activatedRoute.params.subscribe(function (params) {
+            if (_this.post && _this.editForm.dirty) {
+                _this.save();
+            }
             _this.post = _this.blogService.getPost(parseInt(params['id']));
             _this.editForm.markAsPristine();
         });
@@ -493,7 +496,6 @@ var ListComponent = /** @class */ (function () {
     }
     ListComponent.prototype.ngOnInit = function () {
         this.posts = this.blogService.getPosts();
-        // console.log(this.posts);
     };
     ListComponent.prototype.newPost = function () {
         var post = this.blogService.newPost();
